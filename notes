@@ -1,0 +1,27 @@
+insert into user (userName, userEmailAddress, userPassword) values ("kstudy", "iliketostudy@example.com", "password");
+
+insert into studySet (studySetUserID, studySetName) values (1, "chemistry");
+
+insert into termAndDescription (tadStudySetID, tadTerm, tadDescription) values (1, "atom", "The basic unit of a chemical element.");
+
+#user
+--create
+--delete
+--updateEmailAddress
+--ChangePassword
+--search for user by name or email address
+
+#studySet
+--create
+--delete
+--Change name
+--search for study set by name
+
+#termAndDescription
+
+--add new term and description
+--remove term and description
+--search for term
+
+
+
