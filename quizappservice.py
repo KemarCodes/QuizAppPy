@@ -1,18 +1,25 @@
 from flask import Flask, request
+from flask_cors import cross_origin
 from user import User
+from studyset import StudySet
 
 import jwt
 import json
 
 app = Flask(__name__)
 
+
 @app.route('/user/login',methods=['POST'])
+@cross_origin(headers=['Content-Type'])
 def getUser():
-    userEmail = request.form.get('email')
-    userPassword = request.form.get('password')
+    requestData = request.get_json()
+    userEmail = requestData['email']
+    userPassword = requestData['password']
     print(" Email:" + userEmail + " Password:" + userPassword)
     usr = User().getUserByEmailAddress(userEmail)[0]
-    encoded_jwt = jwt.encode({"some": "payload"}, "secret", algorithm="HS256")
+    sessionID = str(User().createSession(usr[0])[0][0])
+    print("SessionID: " + sessionID)
+    encoded_jwt = jwt.encode({"some": "payload"}, sessionID, algorithm="HS256")
     if(usr[3] == userPassword):
         authResponse = {
             "id": usr[0],
@@ -21,6 +28,7 @@ def getUser():
             "access_token": encoded_jwt.decode(),
             "expires_in": 18000
         }
+        User().updateSessionToken(sessionID, encoded_jwt.decode())
         return json.dumps(authResponse)
     else:
         authResponse = {
@@ -33,10 +41,12 @@ def getUser():
         return json.dumps(authResponse)
 
 @app.route('/user/register',methods=['POST'])
+@cross_origin(headers=['Content-Type'])
 def addUser():
-    userName = request.form('name')
-    userEmail = request.form('email')
-    userPassword = request.form('password')
+    requestData = request.get_json()
+    userName = requestData['name']
+    userEmail = requestData['email']
+    userPassword = requestData['password']
     print("Register - Name:" + userName + " Email:" + userEmail\
          + " Password:" + userPassword)   
     if(User().checkIfUserExists(userName, userEmail) == False):
@@ -51,7 +61,9 @@ def addUser():
         }
         return json.dumps(authResponse)
     usr = User().getUserByEmailAddress(userEmail)[0]
-    encoded_jwt = jwt.encode({"some": "payload"}, "secret", algorithm="HS256")
+    sessionID = str(User().createSession(usr[0])[0][0])
+    encoded_jwt = jwt.encode({"some": "payload"}, sessionID, algorithm="HS256")
+    User().updateSessionToken(sessionID, encoded_jwt.decode())
     authResponse = {
         "id": usr[0],
         "name": usr[1],
@@ -61,6 +73,29 @@ def addUser():
     }
     return json.dumps(authResponse)
 
+    
+@app.route('/study/studysets',methods=['POST'])
+@cross_origin(headers=['Content-Type'])
+def retrieveStudySets():
+    requestData = request.get_json()
+    sessionToken = requestData['sessionToken']
+    print("retrieveStudySets - sessionToken:" + sessionToken)
+    #should be checking if the sessionToken is even valid first
+    userID = User().getUserIDBySessionToken(sessionToken)[0][1]
+    studySetList = StudySet().getStudySetByUserID(userID) 
+    sslen = len(studySetList)
+    count = 0
+    rs = '{"studysets": ['
+    for i in studySetList:
+        rs = rs + '{"id": ' + str(i[0]) + ', "name": "' + str(i[2]) + '"}'
+        #The logic should work for sets with multiple entries, but might break
+        #if they have none
+        count = count + 1
+        if(count < sslen):
+            rs = rs + ','
+    rs = rs + ']}'
+    print(rs)
+    return rs
 
 if __name__ == "__main__":
     app.run()

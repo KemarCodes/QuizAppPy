@@ -20,3 +20,11 @@ CREATE TABLE "termAndDescription" (
     FOREIGN KEY (tadStudySetID) REFERENCES studySet (studySetID)
 );
 
+
+CREATE TABLE "session" (
+	"sessionID"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	"sesUserID"	INTEGER NOT NULL,
+	"sesStartTime"	TEXT NOT NULL,
+	FOREIGN KEY (sesUserID) REFERENCES user (userID)
+);
+

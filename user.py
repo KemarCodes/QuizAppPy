@@ -1,4 +1,5 @@
 from quizdbcon import executeQuery, executeDMLQuery
+from datetime import datetime
 
 class User:
     
@@ -30,6 +31,33 @@ class User:
         print(query)
         rs = executeDMLQuery(query)
         return rs
+
+    def createSession(self, userID):
+        #primitive session management
+        currentTime = datetime.now()
+        query = "insert into session (sesUserID, sesStartTime) \
+            values ('{ui}','{st}');"\
+                .format(ui=userID, st=currentTime)
+        print(query)
+        executeDMLQuery(query)
+        query = "select * from session where sesUserID = '{ui}'\
+            and sesStartTime = '{st}';"\
+                .format(ui=userID, st=currentTime)
+        rs = executeQuery(query)
+        return rs
+
+    def updateSessionToken(self, sessionID, sessionToken):
+        query = "update session set sesToken = '{st}' where sessionID = '{si}';"\
+            .format(st=sessionToken, si=sessionID)
+        rs = executeDMLQuery(query)
+        return rs
+
+    def getUserIDBySessionToken(self, sessionToken):
+        query = "select * from session where sesToken = '{st}';"\
+            .format(st=sessionToken)
+        rs = executeQuery(query)
+        return rs
+        
 
     def checkIfUserExists(self, userName, userEmailAddress):
         userNameResult = self.getUserByName(userName)
