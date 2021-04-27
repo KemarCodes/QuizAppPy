@@ -32,3 +32,10 @@ class StudySet:
         print(query)
         rs = executeDMLQuery(query)
         return rs
+
+    def deleteTerm(self, termID):
+        query = "delete from termAndDescription where\
+            tadID = {si};".format(si=termID)
+        print(query)
+        rs = executeDMLQuery(query)
+        return rs
