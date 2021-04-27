@@ -97,5 +97,64 @@ def retrieveStudySets():
     print(rs)
     return rs
 
+@app.route('/study/terms',methods=['POST'])
+@cross_origin(headers=['Content-Type'])
+def retrieveTerms():
+    requestData = request.get_json()
+    studySetID = requestData['studySetID']
+    print("retrieveTerms - studySetID:" + studySetID)
+    #should be checking the sessionToken is even valid first
+    termList = StudySet().getTermsByStudySetID(studySetID)
+    sslen = len(termList)
+    count = 0
+    rs = '{"terms": ['
+    for i in termList:
+        rs = rs + '{"study_set_name": "' + str(i[0]) \
+        + '", "term": "' + str(i[1]) \
+        + '", "description": "' + str(i[2]) \
+        + '", "term_id": ' + str(i[3]) \
+        + ', "study_set_id": ' + str(i[4]) \
+        + '}'
+        #The logic should work for sets with multiple entries, but might break
+        #if they have none
+        count = count + 1
+        if(count < sslen):
+            rs = rs + ','
+    rs = rs + ']}'
+    print(rs)
+    return rs
+
+@app.route('/study/newterm',methods=['POST'])
+@cross_origin(headers=['Content-Type'])
+def addTerm():
+    requestData = request.get_json()
+    studySetID = requestData['studySetID']
+    term = requestData['term']
+    description = requestData['description']
+    print("newTerm - studySetID:" + studySetID\
+        + " term:" + term + " description: " + description)
+    #should be checking the sessionToken is even valid first
+    StudySet().addTerm(studySetID, term, description)
+    termList = StudySet().getTermsByStudySetID(studySetID)
+    sslen = len(termList)
+    count = 0
+    rs = '{"terms": ['
+    for i in termList:
+        rs = rs + '{"study_set_name": "' + str(i[0]) \
+        + '", "term": "' + str(i[1]) \
+        + '", "description": "' + str(i[2]) \
+        + '", "term_id": ' + str(i[3]) \
+        + ', "study_set_id": ' + str(i[4]) \
+        + '}'
+        #The logic should work for sets with multiple entries, but might break
+        #if they have none
+        count = count + 1
+        if(count < sslen):
+            rs = rs + ','
+    rs = rs + ']}'
+    print(rs)
+    return rs
+
+
 if __name__ == "__main__":
     app.run()
