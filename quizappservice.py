@@ -184,6 +184,31 @@ def deleteTerm():
     print(rs)
     return rs
 
+@app.route('/study/newstudyset',methods=['POST'])
+@cross_origin(headers=['Content-Type'])
+def addStudySet():
+    requestData = request.get_json()
+    sessionToken = requestData['sessionToken']
+    studySetName = requestData['studySetName']
+    print("newstudyset - sessionToken:" + sessionToken +\
+        " studySetName: " + studySetName)
+    #should be checking if the sessionToken is even valid first
+    userID = User().getUserIDBySessionToken(sessionToken)[0][1]
+    StudySet().addStudySet(userID, studySetName)
+    studySetList = StudySet().getStudySetByUserID(userID) 
+    sslen = len(studySetList)
+    count = 0
+    rs = '{"studysets": ['
+    for i in studySetList:
+        rs = rs + '{"id": ' + str(i[0]) + ', "name": "' + str(i[2]) + '"}'
+        #The logic should work for sets with multiple entries, but might break
+        #if they have none
+        count = count + 1
+        if(count < sslen):
+            rs = rs + ','
+    rs = rs + ']}'
+    print(rs)
+    return rs
 
 if __name__ == "__main__":
     app.run()

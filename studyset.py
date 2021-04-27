@@ -23,6 +23,15 @@ class StudySet:
         print(query)
         rs = executeQuery(query)
         return rs
+
+    def addStudySet(self, studySetUserID, studySetName):
+        query = "insert into studySet (studySetUserID,\
+            studySetName)\
+                 values ({id},'{sm}');"\
+                .format(id=studySetUserID, sm=studySetName)
+        print(query)
+        rs = executeDMLQuery(query)
+        return rs
     
     def addTerm(self, studySetID, term, description):
         query = "insert into termAndDescription (tadStudySetID,\
